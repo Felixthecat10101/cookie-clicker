@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ultimate Cookie Clicker 200+ Horizontal</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f5f5dc; text-align: center; }
+    #cookie { width: 200px; cursor: pointer; margin: 20px; }
+    #itemsContainer {
+        display: none; /* hidden by default */
+        overflow-x: auto; 
+        white-space: nowrap; 
+        border-top: 2px solid #ccc;
+        padding: 10px;
+        margin-top: 20px;
+    }
+    .item {
+        display: inline-block; 
+        vertical-align: top; 
+        width: 200px; 
+        margin-right: 5px; 
+        padding: 5px; 
+        border: 1px solid #ccc;
+    }
+    button { padding: 5px 10px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h1>🍪 Ultimate Cookie Clicker 200+ 🍪</h1>
+<h2>Cookies: <span id="cookies">0</span></h2>
+<img id="cookie" src="https://upload.wikimedia.org/wikipedia/commons/8/8c/Chocolate_Chip_Cookie.jpg" alt="Cookie">
+
+<div>
+    <button id="toggleItemsBtn">Show Items</button>
+</div>
+
+<div id="itemsContainer"></div>
+
+<!-- Cookie click sound -->
+<audio id="clickSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+
+<script>
+// Game state
+let cookies = 0;
+let cps = 0;
+
+// Base item names
+const baseNames = [
+  "Grandma", "Cookie Jar", "Oven", "Bakery", "Cookie Stand", "Rolling Pin", "Milk Glass", "Cookie Tin", "Sugar Bag", "Chocolate Mixer",
+  "Cookie Factory", "Gingerbread House", "Cookie Robot", "Candy Machine", "Cookie Farm", "Cookie Planet", "Cookie Ship", "Cookie Tower", "Cookie Castle", "Cookie Wizard"
+];
+
+// Generate 200 items
+let items = [];
+for (let i = 1; i <= 200; i++) {
+    let nameIndex = (i-1) % baseNames.length;
+    let prefix = "";
+    if (i > 20 && i <= 50) prefix = "Mega ";
+    if (i > 50 && i <= 100) prefix = "Ultra ";
+    if (i > 100 && i <= 150) prefix = "Super ";
+    if (i > 150) prefix = "Hyper ";
+
+    let itemName = prefix + baseNames[nameIndex];
+
+    // Make first 30 items slightly more expensive
+    let baseCost;
+    if (i <= 30) {
+        baseCost = Math.max(5, Math.floor(5 * Math.pow(1.07, i)));
+    } else if (i <= 100) {
+        baseCost = Math.max(1, Math.floor(1 * Math.pow(1.07, i)));
+    } else {
+        baseCost = Math.max(5, Math.floor(5 * Math.pow(1.08, i-100)));
+    }
+
+    items.push({
+        name: itemName,
+        baseCost: baseCost,
+        cps: Math.floor(i/2),
+        owned: 0
+    });
+}
+
+// Display items in horizontal line
+const itemsContainer = document.getElementById('itemsContainer');
+function updateItems() {
+    itemsContainer.innerHTML = '';
+    items.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'item';
+        const cost = Math.floor(item.baseCost * Math.pow(1.1, item.owned));
+        itemDiv.innerHTML = `
+            <strong>${item.name}</strong><br>
+            Cost: ${cost} 🍪<br>
+            Produces: ${item.cps} cookies/sec<br>
+            Owned: ${item.owned}<br>
+            <button onclick="buyItem(${index})">Buy</button>
+        `;
+        itemsContainer.appendChild(itemDiv);
+    });
+}
+
+// Buying items
+function buyItem(index) {
+    const item = items[index];
+    const cost = Math.floor(item.baseCost * Math.pow(1.1, item.owned));
+    if (cookies >= cost) {
+        cookies -= cost;
+        item.owned++;
+        cps += item.cps;
+        updateDisplay();
+        updateItems();
+    }
+}
+
+// Update cookie count
+function updateDisplay() {
+    document.getElementById('cookies').innerText = Math.floor(cookies);
+}
+
+// Cookie clicking with sound
+const cookieImg = document.getElementById('cookie');
+const clickSound = document.getElementById('clickSound');
+cookieImg.addEventListener('click', () => {
+    cookies++;
+    updateDisplay();
+    clickSound.currentTime = 0;
+    clickSound.play();
+});
+
+// Toggle items container
+const toggleBtn = document.getElementById('toggleItemsBtn');
+toggleBtn.addEventListener('click', () => {
+    if (itemsContainer.style.display === "none") {
+        itemsContainer.style.display = "block";
+        toggleBtn.innerText = "Hide Items";
+    } else {
+        itemsContainer.style.display = "none";
+        toggleBtn.innerText = "Show Items";
+    }
+});
+
+// Auto-cookie generation
+setInterval(() => {
+    cookies += cps/10;
+    updateDisplay();
+}, 100);
+
+updateItems();
+</script>
+
+</body>
+</html>
